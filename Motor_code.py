@@ -9,12 +9,24 @@ import time
 import cv2 as cv # opencv
 import RPi.GPIO as GPIO
 
-servoPIN = 21 # 21번 핀 사용
+ledPIN = 20 # led 용 핀 추후 수정 가능
+            # 모터 핀 바로 위에꺼
+servoPIN = 21 # 21번 핀 사용 GND 옆
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(servoPIN, GPIO.OUT)
+GPIO.setup(ledPIN, GPIO.OUT) # 타이머 대용으로 쓸거므로 out
+GPIO.Input()
 
 p = GPIO.PWM(servoPIN, 50) # GPIO 17 als PWM mit 50Hz
+l = GPIO.PWM(ledPIN, 50)
 # 이게 왜 50부터 시작인지는 좀 봐야할거같
+
+"""
+GPIO.output(ledPIN,GPIO.HIGH)
+GPIO.output(ledPIN,GPIO.LOW)
+time.sleep(0.1)
+"""
+
 p.start(2.5) # Initialisierung 초기화
 # 정확히는 현재 각도의 값을 몇으로 잡을 것인가를 정의
 
