@@ -8,6 +8,8 @@ Created on Sun Dec  1 16:46:10 2019
 import time
 import cv2 as cv # opencv
 import RPi.GPIO as GPIO
+import picamera as cam
+# 라즈베리 파이 카메라 import 
 
 ledPIN = 20 # led 용 핀 추후 수정 가능
             # 모터 핀 바로 위에꺼
@@ -15,7 +17,6 @@ servoPIN = 21 # 21번 핀 사용 GND 옆
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(servoPIN, GPIO.OUT)
 GPIO.setup(ledPIN, GPIO.OUT) # 타이머 대용으로 쓸거므로 out
-GPIO.Input()
 
 p = GPIO.PWM(servoPIN, 50) # GPIO 17 als PWM mit 50Hz
 l = GPIO.PWM(ledPIN, 50)
@@ -43,8 +44,15 @@ val = 1; # 우선 현재 각도를 좀 파악할 필요가 있음..
 #        if (key == 27): 
 #            break
 
+camera = cam.PiCamera() # 카메라 객체 만들고
+camera.resolution = (800,600) # 사진 크기 결정
+
 try:
     # OpenCV 호출 구간 
+    # 오픈할 카메라정보를 넘겨줘야할거같은데    
+    camera.capture("경로명 및 사진이름") # 라즈베리 카메라 캡쳐
+
+
     cap = cv2.VideoCapture(0) # 카메라 객체를 열어둠
     while cap.isOpend(): # 무한루프
         # 기본 카메라로 화면 데이터를 읽어옴   
