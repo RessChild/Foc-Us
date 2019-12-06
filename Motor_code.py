@@ -19,18 +19,19 @@ GPIO.setmode(GPIO.BCM) # BCM 으로 사용
 GPIO.setup(servoPIN, GPIO.OUT) # 모터 조작용 정보핀
 GPIO.setup(ledPIN, GPIO.OUT) # 타이머 대용으로 쓸거므로 out
 
-p = GPIO.PWM(servoPIN, 50) # GPIO 17 als PWM mit 50Hz
+p = GPIO.PWM(servoPIN, 100) # GPIO 17 als PWM mit 50Hz
 GPIO.PWM(ledPIN, 100) # GPIO 17 als PWM mit 50Hz
 # 이게 왜 50부터 시작인지는 좀 봐야할거같음
 # LED 에선 PWM이 밝기값을 조절하는 용도
 # servo 에서는 값 표현의 범위가 비례하며 값이 클수록 세세한 조절이 가능
 # 참고로 50 기준 3.5~13 / 100 기준 7~26
+# 최소치는 3 정도로 보면될듯함
 
 # 정확히는 현재 각도의 값을 몇으로 잡을 것인가를 정의
 p.start(0) # Initialisierung 초기화
-angle = 5 # 모터가 사용할 기본
+angle = 0 # 모터가 사용할 기본
 p.ChangeDutyCycle(angle) # 중심으로 모터를 옮김
-sleep(2)
+time.sleep(2)
 # 이걸 기반으로 모터 각을 계산하고 이동여부를 판단
 
 #우선 생각중인건 무한루프 돌리고,
@@ -55,17 +56,19 @@ def servoControl(move): # 모터 컨트롤용 함수
     global angle
     # 들어온 정보를 기반으로 모터를 회전
     # 카메라 이동 구간
-    angle = angle+move if angle+move < 25 else angle
+    angle = angle+move if angle+move < 17 else angle
     # 합이 25를 넘지않으면 더한값, 아니라면 원본 값 대입
     p.ChangeDutyCycle(angle)
-    time.sleep(1)
+    print(angle)
+    time.sleep(2)
     # 실제로 카메라를 움직이는 구간
     # 입출력 시간을 고려해서 몇번 테스트 해봐야할듯
 # servo 함수 확인 완료
 # 이제 수정해야됨
     
 def finish():  #종료함수
-    p.ChangeDutyCycle(0) # 각도를 초기화하고 종료
+    p.ChangeDutyCycle(3) # 각도를 초기화하고 종료
+    time.sleep(1)
     p.stop()
     GPIO.cleanup()
 #    cap.release()
@@ -122,9 +125,7 @@ def Foc_Us(): # 본체가 될 함수
     
 if __name__=="__main__": # 함수호출
 #    ledTimer(5)
-    servoControl(2.5)
-    servoControl(2.5)
-    servoControl(-2.5)
-    servoControl(2.5)
+    for i in range(20):
+        servoControl(1)
     finish()
 #    Foc_Us()
