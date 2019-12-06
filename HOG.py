@@ -24,31 +24,27 @@ time.sleep(2.0)
 while True:
 # grab the raw NumPy array representing the image, then initialize the timestamp
 # and occupied/unoccupied text
-	frame = vs.read()
-	frame = imutils.resize(frame, width=400)
+    frame = vs.read()
+    frame = imutils.resize(frame, width=400)
  	# (h, w) = frame.shape[:2]
 	# image = frame.array
 	# image = imutils.resize(image, width=min(400, image.shape[1]))
 	# detect people in the image
-	(rects, weights) = hog.detectMultiScale(frame, winStride=(4, 4), padding=(8, 8), scale=1.05)
-for (x, y , w, h) in rects:
-	cv2. rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
-	print(x, y, x+w, y+h)
-
+    (rects, weights) = hog.detectMultiScale(frame, winStride=(4, 4), padding=(8, 8), scale=1.05)
+    for (x, y , w, h) in rects:
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
 # draw the original bounding boxes
 # apply non-maxima suppression to the bounding boxes using a
 # fairly large overlap threshold to try to maintain overlapping
 # boxes that are still people
     rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
     pick = non_max_suppression(frame, probs=None, overlapThresh=0.65)
-    if rects is not None:
-        (x1, y1, w1, h1) = rects.astype("int")[0]
+    (x1, y1, w1, h1) = rects.astype("int")[0]
 
     # draw the final bounding boxes
-    	cv2.rectangle(fram, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
-    
+    cv2.rectangle(frame, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0),2)    
     # show the frame
-    	cv2.imshow("Frame", frame)
+    cv2.imshow("Frame", frame)
 
     key = cv2.waitKey(1) & 0xFF
 
