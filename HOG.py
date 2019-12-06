@@ -31,18 +31,20 @@ while True:
 	# image = imutils.resize(image, width=min(400, image.shape[1]))
 	# detect people in the image
     (rects, weights) = hog.detectMultiScale(frame, winStride=(4, 4), padding=(8, 8), scale=1.05)
-    for (x, y , w, h) in rects:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
+    if rects:
+        for (x, y , w, h) in rects:
+            cv2.rectangle(frame, (x, y), (x+w, y+h),0, ( 0, 255), 2)
 # draw the original bounding boxes
 # apply non-maxima suppression to the bounding boxes using a
 # fairly large overlap threshold to try to maintain overlapping
 # boxes that are still people
-    rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-    pick = non_max_suppression(frame, probs=None, overlapThresh=0.65)
-    (x1, y1, w1, h1) = rects.astype("int")[0]
+    
+        rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
+        pick = non_max_suppression(frame, probs=None, overlapThresh=0.65)
+        (x1, y1, w1, h1) = rects.astype("int")[0]
 
     # draw the final bounding boxes
-    cv2.rectangle(frame, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0),2)    
+        cv2.rectangle(frame, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0),2)    
     # show the frame
     cv2.imshow("Frame", frame)
 
