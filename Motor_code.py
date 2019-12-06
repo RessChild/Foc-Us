@@ -7,7 +7,7 @@ Created on Sun Dec  1 16:46:10 2019
 
 from datetime import datetime
 import time
-import cv2 as cv # opencv
+import cv2 # opencv
 import RPi.GPIO as GPIO
 import picamera as cam
 # 라즈베리 파이 카메라 import 
@@ -26,8 +26,11 @@ GPIO.PWM(ledPIN, 100) # GPIO 17 als PWM mit 50Hz
 # servo 에서는 값 표현의 범위가 비례하며 값이 클수록 세세한 조절이 가능
 # 참고로 50 기준 3.5~13 / 100 기준 7~26
 
-p.start(0) # Initialisierung 초기화
 # 정확히는 현재 각도의 값을 몇으로 잡을 것인가를 정의
+p.start(0) # Initialisierung 초기화
+angle = 12.5 # 모터가 사용할 기본
+p.ChangeDutyCycle(angle) # 중심으로 모터를 옮김
+# 이걸 기반으로 모터 각을 계산하고 이동여부를 판단
 
 #우선 생각중인건 무한루프 돌리고,
 # sleep(0.1)씩이라도 돌려서 조금씩 맞춰가는거
@@ -45,15 +48,27 @@ def ledTimer(loop): # 타이머 정의 함수, 1초를 주기로 깜빡거림
         time.sleep(0.5)
         GPIO.output(ledPIN,GPIO.LOW)
         time.sleep(0.5)
+# led 함수 확인완료
 
-def servoControl(angle): # 모터 컨트롤용 함수
+def servoControl(move): # 모터 컨트롤용 함수
+    global angle
     # 들어온 정보를 기반으로 모터를 회전
     # 카메라 이동 구간
+    angle = angle+move if angle+move < 25 else angle
+    # 합이 25를 넘지않으면 더한값, 아니라면 원본 값 대입
     p.ChangeDutyCycle(angle)
-    time.sleep(0.2)
+    time.sleep(1)
     # 실제로 카메라를 움직이는 구간
     # 입출력 시간을 고려해서 몇번 테스트 해봐야할듯
-    return
+# servo 함수 확인 완료
+# 이제 수정해야됨
+    
+def finish():  #종료함수
+    p.ChangeDutyCycle(0) # 각도를 초기화하고 종료
+    p.stop()
+    GPIO.cleanup()
+#    cap.release()
+#    cv2.destroyAllWindows()
 
 def Foc_Us(): # 본체가 될 함수
     
@@ -96,10 +111,7 @@ def Foc_Us(): # 본체가 될 함수
         camera.capture("/foc_us/"+datetime.now()+".jpg") # 라즈베리 카메라 캡쳐
         
     except KeyboardInterrupt: # ctrl + c 
-        p.stop()
-        GPIO.cleanup()
-        cap.release()
-        cv2.destroyAllWindows()
+        finish()
 
 # 이후 하게된다면 이쪽 구간에서 카메라 촬영 함수 호출할듯..?
 # 사용자 UI 정보도 이쪽이고
@@ -110,4 +122,8 @@ def Foc_Us(): # 본체가 될 함수
 if __name__=="__main__": # 함수호출
 #    ledTimer(5)
     servoControl(12.5)
+    servoControl(12.5)
+    servoControl(-12.5)
+    servoControl(12.5)
+    finish()
 #    Foc_Us()
