@@ -121,9 +121,9 @@ def Foc_Us(): # 본체가 될 함수
     
 if __name__=="__main__": # 함수호출
 #    ledTimer(5)
-    servoControl(12.5)
-    servoControl(12.5)
-    servoControl(-12.5)
-    servoControl(12.5)
+    servoControl(2.5)
+    servoControl(2.5)
+    servoControl(-2.5)
+    servoControl(2.5)
     finish()
 #    Foc_Us()
