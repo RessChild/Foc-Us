@@ -5,6 +5,7 @@ Created on Sun Dec  1 16:46:10 2019
 @author: wpqld_000
 """
 
+from datetime import datetime
 import time
 import cv2 as cv # opencv
 import RPi.GPIO as GPIO
@@ -19,21 +20,21 @@ GPIO.setup(servoPIN, GPIO.OUT) # 모터 조작용 정보핀
 GPIO.setup(ledPIN, GPIO.OUT) # 타이머 대용으로 쓸거므로 out
 
 p = GPIO.PWM(servoPIN, 50) # GPIO 17 als PWM mit 50Hz
+GPIO.PWM(ledPIN, 100) # GPIO 17 als PWM mit 50Hz
 # 이게 왜 50부터 시작인지는 좀 봐야할거같음
 # LED 에선 PWM이 밝기값을 조절하는 용도
 # servo 에서는 값 표현의 범위가 비례하며 값이 클수록 세세한 조절이 가능
 # 참고로 50 기준 3.5~13 / 100 기준 7~26
 
-p.start(2.5) # Initialisierung 초기화
+p.start(0) # Initialisierung 초기화
 # 정확히는 현재 각도의 값을 몇으로 잡을 것인가를 정의
 
 #우선 생각중인건 무한루프 돌리고,
 # sleep(0.1)씩이라도 돌려서 조금씩 맞춰가는거
 
-val = 1; # 우선 현재 각도를 좀 파악할 필요가 있음..
-# 받을 수 있으면 받아쓰는 함수를 쓰고
-# 아니라면 그냥 제일 처음각도로 강제이동시키고 써야할듯
-# 그것도 아니면, 그냥 정상종료시에 각도를 일정위치로 정하고 끝낼수도
+# 원래는 현재 기기가 가리키는 각도의 값을 반환받아 쓰고자 했는데
+# 아두이노랑 다르게 라즈베리의 경우 이런 역할을 하는 함수가 존재하지 않는 듯
+# 그저 외부에서 강제로 모터를 제어하는 함수만 지원하는걸로 보임
 
 camera = cam.PiCamera() # 카메라 객체 만들고
 camera.resolution = (800,600) # 사진 크기 결정
@@ -45,8 +46,13 @@ def ledTimer(time): # 타이머 정의 함수, 1초를 주기로 깜빡거림
         GPIO.output(ledPin,GPIO.LOW)
         time.sleep(0.5)
 
-def servoControl(): # 모터 컨트롤용 함수
-                    # 카메라에서 들어온 정보를 기반으로 모터를 회전 
+def servoControl(angle): # 모터 컨트롤용 함수
+    # 들어온 정보를 기반으로 모터를 회전
+    # 카메라 이동 구간
+    p.ChangeDutyCycle(angle)
+    time.sleep(0.2)
+    # 실제로 카메라를 움직이는 구간
+    # 입출력 시간을 고려해서 몇번 테스트 해봐야할듯
     return
 
 def Foc_Us(): # 본체가 될 함수
@@ -62,7 +68,7 @@ def Foc_Us(): # 본체가 될 함수
             success, frame = cap.read() # 성공 여부 및 프레임
             if success:
             # 프레임 출력
-    #            cv2.imshow('Camera Window', frame)
+            # cv2.imshow('Camera Window', frame)
     
             # 포지션을 잡고, 물체의 위치값을 반환받음
             # obj = ~~~
@@ -83,13 +89,19 @@ def Foc_Us(): # 본체가 될 함수
             # 그래서 그냥 무한루프 돌리면서 계속 중심잡아가는게 편할거같음
             # 다만 문제점은 이거 인터럽트 걸어줘야하는데 그거 방식좀 찾아보고
             # 하여튼 현재 위치 값을 조건에 따라 다른 각 이동을 시키는 방식
-    
-            # 카메라 이동 구간       
-            p.ChangeDutyCycle(val) 
-            time.sleep(0.2)
-            # 실제로 카메라를 움직이는 구간
-            # 입출력 시간을 고려해서 몇번 테스트 해봐야할듯
-    
+            
+            angle = 0 # 여기 추후에 수정 필요
+            # 모션캡쳐로 위치값을 받아오고 그에 따라서 각조절이 좀 필요할듯
+            
+            while True: # 우선은 무한 반복
+                servoControl(angle)
+            # 현재 각위치를 알아야 카메라를 돌리는 정도를 알 수 있기 때문에
+            # 우선 객체로 구현을 할 것을 고민 중
+        
+        # 탐지 성공했다면 루프 빠져나올거고
+        ledTimer(3) # 정해진 시간만큼 깜빡이고
+        camera.capture("/foc_us/"+datetime.now()+".jpg") # 라즈베리 카메라 캡쳐
+        
     except KeyboardInterrupt: # ctrl + c 
         p.stop()
         GPIO.cleanup()
@@ -103,4 +115,6 @@ def Foc_Us(): # 본체가 될 함수
 # 좀 힘들거같긴한데 이게 안되면 촬영을 매초 해서 전송하는방식응로 바꿔얒 뭐..
     
 if __name__="__main__": # 함수호출
-    
+    ledTimer(5)
+    servoControl(12.5)
+#    Foc_Us()

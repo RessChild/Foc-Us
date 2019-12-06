@@ -39,23 +39,25 @@ for (x, y , w, h) in rects:
 # apply non-maxima suppression to the bounding boxes using a
 # fairly large overlap threshold to try to maintain overlapping
 # boxes that are still people
-        rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-        pick = non_max_suppression(frame, probs=None, overlapThresh=0.65)
-	(x1, y1, w1, h1) = rects.astype("int")
+    rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
+    pick = non_max_suppression(frame, probs=None, overlapThresh=0.65)
+    if rects is not None:
+        (x1, y1, w1, h1) = rects.astype("int")[0]
 
-# draw the final bounding boxes
-	cv2.rectangle(fram, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
+    # draw the final bounding boxes
+    	cv2.rectangle(fram, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
+    
+    # show the frame
+    	cv2.imshow("Frame", frame)
 
-# show the frame
-	cv2.imshow("Frame", frame)
-	key = cv2.waitKey(1) & 0xFF
+    key = cv2.waitKey(1) & 0xFF
 
 # clear the stream in preparation for the next frame
 # rawCapture.truncate(0)
 
 # if the `q` key was pressed, break from the loop
-        if key == ord("q"):
-		break
+    if key == ord("q"):
+        break
 
 cv2.destroyAllWindow()
 vs.stop()
