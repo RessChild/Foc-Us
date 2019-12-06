@@ -39,11 +39,11 @@ p.start(0) # Initialisierung 초기화
 camera = cam.PiCamera() # 카메라 객체 만들고
 camera.resolution = (800,600) # 사진 크기 결정
 
-def ledTimer(time): # 타이머 정의 함수, 1초를 주기로 깜빡거림
-    for i in range(time):
+def ledTimer(loop): # 타이머 정의 함수, 1초를 주기로 깜빡거림
+    for i in range(loop):
         GPIO.output(ledPIN,GPIO.HIGH)
         time.sleep(0.5)
-        GPIO.output(ledPin,GPIO.LOW)
+        GPIO.output(ledPIN,GPIO.LOW)
         time.sleep(0.5)
 
 def servoControl(angle): # 모터 컨트롤용 함수
@@ -76,25 +76,18 @@ def Foc_Us(): # 본체가 될 함수
             # 조건문 구간
             # 모터의 회전 각을 수정하는 방식
             # 대략적인 수식은 아래처럼 될듯
-            """
-            if obj < 중심값:
-                val = val + 1
-            elif obj > 중심값:
-                val = val - 1
-            else obj == 중심값:
-                ~~ (아마 break 구문이 들어갈듯)
-            """
+           
             # 굳이 저렇게 작은값을 쓰는 이유는
             # 물리적인 데이터 입출력 적용속도가 있을거니까
             # 그래서 그냥 무한루프 돌리면서 계속 중심잡아가는게 편할거같음
             # 다만 문제점은 이거 인터럽트 걸어줘야하는데 그거 방식좀 찾아보고
             # 하여튼 현재 위치 값을 조건에 따라 다른 각 이동을 시키는 방식
             
-            angle = 0 # 여기 추후에 수정 필요
+                angle = 0 # 여기 추후에 수정 필요
             # 모션캡쳐로 위치값을 받아오고 그에 따라서 각조절이 좀 필요할듯
             
-            while True: # 우선은 무한 반복
-                servoControl(angle)
+                while True: # 우선은 무한 반복
+                    servoControl(angle)
             # 현재 각위치를 알아야 카메라를 돌리는 정도를 알 수 있기 때문에
             # 우선 객체로 구현을 할 것을 고민 중
         
@@ -114,7 +107,7 @@ def Foc_Us(): # 본체가 될 함수
 # 우선,라즈베리 카메라로 실시간 영상전송이 가능한가 여부
 # 좀 힘들거같긴한데 이게 안되면 촬영을 매초 해서 전송하는방식응로 바꿔얒 뭐..
     
-if __name__="__main__": # 함수호출
-    ledTimer(5)
+if __name__=="__main__": # 함수호출
+#    ledTimer(5)
     servoControl(12.5)
 #    Foc_Us()
