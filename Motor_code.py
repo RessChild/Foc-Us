@@ -38,7 +38,7 @@ GPIO.PWM(ledPIN, 100) # GPIO 17 als PWM mit 50Hz
 
 # 정확히는 현재 각도의 값을 몇으로 잡을 것인가를 정의
 p.start(0) # Initialisierung 초기화
-angle = 0 # 모터가 사용할 기본
+angle = 10 # 모터가 사용할 기본 (3~17 중간값)
 p.ChangeDutyCycle(angle) # 중심으로 모터를 옮김
 time.sleep(2)
 # 이걸 기반으로 모터 각을 계산하고 이동여부를 판단
