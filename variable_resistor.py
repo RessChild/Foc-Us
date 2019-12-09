@@ -15,7 +15,7 @@ SPICLK = 11
 SPIMISO = 9
 SPIMOSI = 10
 SPICS = 8 # 가변저항 사용용 변수
-LED = 18 # LED 핀
+#LED = 18 # LED 핀
 
 photo_ch = 0
 
@@ -27,7 +27,7 @@ def init():
     GPIO.setup(SPIMISO, GPIO.IN)
     GPIO.setup(SPICLK, GPIO.OUT)
     GPIO.setup(SPICS, GPIO.OUT)
-    GPIO.setup(LED, GPIO.OUT) # 가변저항용 출력 4개와 LED 하나
+#    GPIO.setup(LED, GPIO.OUT) # 가변저항용 출력 4개와 LED 하나
 
 def readadc(adcnum, clockpin, mosipin, misopin, cspin): # 가변저항 세팅 코드
     if ((adcnum > 7) or (adcnum < 0)):
@@ -65,14 +65,14 @@ def main():
     init()
     time.sleep(2)
     print("analog level\n")
-    pwm = GPIO.PWM(LED,1000) # 1000 기준으로 세팅
-    pwm.start(0) # 시작
+#    pwm = GPIO.PWM(LED,1000) # 1000 기준으로 세팅
+#    pwm.start(0) # 시작
     while True:
         adc_value=readadc(photo_ch, SPICLK, SPIMOSI, SPIMISO, SPICS) # 가변저항 값
-        adc_value = adc_value/11 # 11로 나눠서 적절한 값으로 변환
+        adc_value = adc_value/200 # 11로 나눠서 적절한 값으로 변환
         print("%d" % adc_value) # 출력
         time.sleep(0.2) # 0.2 초 쉬고
-        pwm.ChangeDutyCycle(adc_value) # LED 밝기 변환
+#        pwm.ChangeDutyCycle(adc_value) # LED 밝기 변환
 
 if __name__ == '__main__':
     try:
