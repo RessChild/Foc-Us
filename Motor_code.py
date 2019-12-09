@@ -57,14 +57,15 @@ hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 # hog 는 대상탐색 지원 라이브러리
 # 다수의 인원을 탐색 할 수 있도록 세팅
-vs = None # finish 에서 써야하니까 전역으로 빼내어 선언함
+#vs = None # finish 에서 써야하니까 전역으로 빼내어 선언함
+vs = VideoStream(usePiCamera=True).start()
 
 
 def objDetect():
-    global vs
-    vs = VideoStream(usePiCamera=True).start()
+    #vs = VideoStream(usePiCamera=True).start()
     #파이 카메라를 통해 화면을 받아오도록 하고, 촬영 시작
     time.sleep(2.0) #실행 대기시간
+    print("Stream Started!")
     
     while True: # 무한 루프
     # grab the raw NumPy array representing the image, then initialize the timestamp
@@ -76,48 +77,46 @@ def objDetect():
         (rects, weights) = hog.detectMultiScale(frame, winStride=(4, 4), padding=(8, 8), scale=1.05)
         # 탐색해서 대상이 있다고 예상되는 사각형을 갖고 옴
     
-        ave_x = 0 # 다수 대상의 평균 위치값을 구할예정
-    
         if len(rects) > 0: # 탐색한 놈이 1개 이상 있다면
             for (x, y , w, h) in rects: # 각 경우에 대해서
                 cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2) # 사각형을 그림
-        
+                 
             # 각 사각형 정보를 사용하기 위해 배열로 변환
             rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
             #non_max_suppression(frame, probs=None, overlapThresh=0.65)
             (x1, y1, w1, h1) = rects.astype("int")[0]
             # 반환되는 값은 2차원 배열값이므로, 인덱스 접근을 통해 1차원 값을 접근
+            
 
+            # draw the final bounding boxes
+            cv2.rectangle(frame, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0),2)
+            # 최종탐색
+            
             if x1 + (w1//2) > 205: # 피사체 중심이 오른쪽으로 쏠린 경우
                 print("왼쪽이동")
-                succ = True if servoControl(-1) else False # 그 반대방향으로 이동
+                succ = True if servoControl(1) else False # 그 반대방향으로 이동
                 if not succ:
                     break # 초점을 맞추기 위해 더이상 움직일 수 없다면, 종료
             elif x1 + (w1//2) < 195: #
                 print("오른쪽이동")
-                succ = True if servoControl(1) else False
+                succ = True if servoControl(-1) else False
                 if not succ:
                     break # 마찬가지
             else: # 그 외의 경우는 초점 잡기 완료
                 print("초점 잡혔음")
                 return True # 성공적으로 끝
-    
-        # draw the final bounding boxes
-            cv2.rectangle(frame, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0),2)    
-            # 최종탐색
             
-        # show the frame
-        cv2.imshow("Frame", frame) # 화면을 출력
-        
+        cv2.imshow("Frame", frame)
+
                     # 이부분 수정 필요 
             # 지금은 단일탐색 기준으로 코드를 짰는데 이건 다중탐색으로 진행되므로
             # 평균값을 구해서 그 중심으로 이동시키는 코드로 변환이 필요
             # 중심값에서의 약간의 오차를 허용
 
     
-        #key = cv2.waitKey(1) & 0xFF # 입력된 키가 있고, q라면 종료
-        #if key == ord("q"):
-            #break
+        key = cv2.waitKey(1) & 0xFF # 입력된 키가 있고, q라면 종료
+        if key == ord("q"):
+            break
     return False # 실패. 더이상 진행 불가
 
 
@@ -151,7 +150,6 @@ def servoControl(move): # 모터 컨트롤용 함수
     
 def finish():  #종료함수
     global p
-    global vs
     p.ChangeDutyCycle(3) # 각도를 초기화하고 종료
     time.sleep(1)
     p.stop()
