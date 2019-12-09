@@ -41,7 +41,7 @@ while True:
     
         rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
         # pick = non_max_suppression(frame, probs=None, overlapThresh=0.65)
-        non_max_suppression(frame, probs=None, overlapThresh=0.65)
+        #non_max_suppression(frame, probs=None, overlapThresh=0.65)
         (x1, y1, w1, h1) = rects.astype("int")[0]
 
     # draw the final bounding boxes

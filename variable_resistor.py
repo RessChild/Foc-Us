@@ -69,7 +69,7 @@ def main():
 #    pwm.start(0) # 시작
     while True:
         adc_value=readadc(photo_ch, SPICLK, SPIMOSI, SPIMISO, SPICS) # 가변저항 값
-        adc_value = adc_value/200 # 11로 나눠서 적절한 값으로 변환
+        adc_value = adc_value/145 # 11로 나눠서 적절한 값으로 변환
         print("%d" % adc_value) # 출력
         time.sleep(0.2) # 0.2 초 쉬고
 #        pwm.ChangeDutyCycle(adc_value) # LED 밝기 변환
