@@ -8,6 +8,7 @@ Created on Mon Dec  9 02:16:52 2019
 # 아무래도 이건 그냥 가져다 써야할거같다
 # 너무 세부적인 코드도 많고 보기 힘들고..
 
+import threading
 import RPi.GPIO as GPIO
 import time
 
@@ -60,6 +61,10 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin): # 가변저항 세팅 �
     GPIO.output(cspin, True)
     adcout >>= 1
     return adcout
+
+def timerValue():
+    init()
+    return readadc(photo_ch, SPICLK, SPIMOSI, SPIMISO, SPICS)/145 # 가변저항 값    
 
 def main():
     init()

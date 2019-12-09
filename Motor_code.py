@@ -21,6 +21,8 @@ import argparse
 import imutils
 # 라즈베리 파이 카메라 import 
 
+import variable_resistor as vr
+
 ledPIN = 20 # led 용 핀 추후 수정 가능
             # 모터 핀 바로 위에꺼
 servoPIN = 21 # 21번 핀 사용 GND 옆
@@ -47,8 +49,8 @@ time.sleep(2)
 # 아두이노랑 다르게 라즈베리의 경우 이런 역할을 하는 함수가 존재하지 않는 듯
 # 그저 외부에서 강제로 모터를 제어하는 함수만 지원하는걸로 보임
 
-camera = cam.PiCamera() # 카메라 객체 만들고
-camera.resolution = (800,600) # 사진 크기 결정
+#camera = cam.PiCamera() # 카메라 객체 만들고
+#camera.resolution = (800,600) # 사진 크기 결정
 
 cap = cv2.VideoCapture(0) # cv 의 카메라캡쳐 객체
 hog = cv2.HOGDescriptor()
@@ -74,6 +76,8 @@ def objDetect():
         (rects, weights) = hog.detectMultiScale(frame, winStride=(4, 4), padding=(8, 8), scale=1.05)
         # 탐색해서 대상이 있다고 예상되는 사각형을 갖고 옴
     
+        ave_x = 0 # 다수 대상의 평균 위치값을 구할예정
+    
         if len(rects) > 0: # 탐색한 놈이 1개 이상 있다면
             for (x, y , w, h) in rects: # 각 경우에 대해서
                 cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2) # 사각형을 그림
@@ -88,27 +92,34 @@ def objDetect():
             cv2.rectangle(frame, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0),2)    
             # 최종탐색
             
-            # 이부분 수정 필요 
+            ave_x = ave_x + x1 + w1//2 # 사각형의 가로 중심을 잡음
+            
+        # show the frame
+        cv2.imshow("Frame", frame) # 화면을 출력
+        
+                    # 이부분 수정 필요 
             # 지금은 단일탐색 기준으로 코드를 짰는데 이건 다중탐색으로 진행되므로
             # 평균값을 구해서 그 중심으로 이동시키는 코드로 변환이 필요
             # 중심값에서의 약간의 오차를 허용
-            if x1 + (w1//2) > 205: # 피사체 중심이 오른쪽으로 쏠린 경우
-                succ = True if servoControl(-1) else False # 그 반대방향으로 이동
-               if not succ:
-                    break # 초점을 맞추기 위해 더이상 움직일 수 없다면, 종료
-            elif x1 + (w1//2) < 195: #
-                succ = True if servoControl(1) else False
-                if not succ:
-                    break # 마찬가지
-            else: # 그 외의 경우는 초점 잡기 완료
-                print("초점 잡혔음")
-                return True # 성공적으로 끝
-        # show the frame
-        cv2.imshow("Frame", frame) # 화면을 출력
+        ave_x = ave_x // len(rects)
+        if x1 + (w1//2) > 205: # 피사체 중심이 오른쪽으로 쏠린 경우
+            print("왼쪽이동")
+            succ = True if servoControl(-1) else False # 그 반대방향으로 이동
+            if not succ:
+                break # 초점을 맞추기 위해 더이상 움직일 수 없다면, 종료
+        elif x1 + (w1//2) < 195: #
+            print("오른쪽이동")
+            succ = True if servoControl(1) else False
+            if not succ:
+                break # 마찬가지
+        else: # 그 외의 경우는 초점 잡기 완료
+            print("초점 잡혔음")
+            return True # 성공적으로 끝
+
     
-        key = cv2.waitKey(1) & 0xFF # 입력된 키가 있고, q라면 종료
-        if key == ord("q"):
-            break
+        #key = cv2.waitKey(1) & 0xFF # 입력된 키가 있고, q라면 종료
+        #if key == ord("q"):
+            #break
     return False # 실패. 더이상 진행 불가
 
 
@@ -160,7 +171,8 @@ def Foc_Us(): # 본체가 될 함수
         succ = objDetect() #물체 탐지 시작
         # 성공여부를 반환받음
         if succ: # 성공이라면 타이머 입력 대기로 넘어감
-            ledTimer(3)
+            loop = vs.timerValue()
+            ledTimer(loop)
         else:
             print("초점 실패, 진행 불가합니다")
 
