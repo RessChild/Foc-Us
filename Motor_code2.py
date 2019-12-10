@@ -7,6 +7,10 @@ Created on Sun Dec  1 16:46:10 2019
 
 from __future__ import print_function
 
+from flask import Flask, render_template, Response
+import base64
+import urllib
+
 from datetime import datetime
 import time
 import cv2 # opencv
@@ -22,6 +26,8 @@ import imutils
 # 라즈베리 파이 카메라 import 
 
 import variable_resistor as vr
+
+app = Flask(__name__)
 
 ledPIN = 20 # led 용 핀 추후 수정 가능
             # 모터 핀 바로 위에꺼
@@ -61,15 +67,38 @@ hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 vs = VideoStream(usePiCamera=True).start()
 
 
+@app.after_request
+def add_header(response):
+    response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
+    response.headers['Cache-Control'] = 'public, max-age=0'
+    return response
+
+@app.route("/")
+def streaming():
+    print("Flask Activating")
+    return render_template('index.html')
+
+def gen():
+    while True:
+        rval, frame = cap.read()
+        cv2.imwrite('t.jpg', frame)
+        yield(b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + open('t.jpg', 'rb').read() + b'\r\n')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 def objDetect():
     #vs = VideoStream(usePiCamera=True).start()
     #파이 카메라를 통해 화면을 받아오도록 하고, 촬영 시작
+    global frame
     time.sleep(2.0) #실행 대기시간
     print("Stream Started!")
     
     while True: # 무한 루프
     # grab the raw NumPy array representing the image, then initialize the timestamp
-    # and occupied/unoccupied text
+    # and occupied/unoccupied t/ext
         frame = vs.read() # 파이카메라에서 이미지를 한장 가져옴
         frame = imutils.resize(frame, width=400) # 사진 크기 변환
     
@@ -114,9 +143,9 @@ def objDetect():
             # 중심값에서의 약간의 오차를 허용
 
     
-        key = cv2.waitKey(1) & 0xFF # 입력된 키가 있고, q라면 종료
-        if key == ord("q"):
-            break
+        #key = cv2.waitKey(1) & 0xFF # 입력된 키가 있고, q라면 종료
+        #if key == ord("q"):
+        #    break
     return False # 실패. 더이상 진행 불가
 
 
@@ -191,4 +220,5 @@ if __name__=="__main__": # 함수호출
 #    for i in range(20):
 #        servoControl(1)
 #    finish()
+    app.run(host='0.0.0.0', port=80, debug=True, threaded=True)
     Foc_Us()
