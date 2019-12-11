@@ -9,6 +9,7 @@ class Camera(object):
     thread = None
     frame = None
     last_access = 0
+    capturing = False
 
     def initialize(self):
         if Camera.thread is None:
@@ -23,7 +24,8 @@ class Camera(object):
         self.initialize()
         return self.frame
 
-    def _thread(self):
+    @classmethod
+    def _thread(cls):
         with picamera.PiCamera() as camera:
             camera.resolution = (320, 240)
             camera.hflip = True
@@ -35,14 +37,16 @@ class Camera(object):
             stream = io.BytesIO()
             for foo in camera.capture_continuous(stream, 'jpeg',
                                                  use_video_port=True):
-                im = Image.open(stream)
-                im.save('./static/img.jpg', 'JPEG')
+                if capturing:
+                    im = Image.open(stream)
+                    im.save('/static/img.jpeg')
+                    capturing = False
                 stream.seek(0)
-                self.frame = stream.read()
+                cls.frame = stream.read()
 
                 stream.seek(0)
                 stream.truncate()
 
-                if time.time() - Camera.last_access > 10:
+                if time.time() - cls.last_access > 10:
                     break
-        thread = None
+        cls.thread = None

@@ -1,26 +1,11 @@
 <html>
 <head>
-	<title>Pet Feeder</title>
+	<title>임베디드 기말 프로젝트</title>
 	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 </head>
 <body>
-	<h1>Pet Feeder</h1>
+	<h1>임베디드 카메라</h1>
 	<img src="{{ url_for('video_feed') }}">
-	<br>
-	<br>
-	<button>Feed</button>
-
-	<script>
-		$( 'button' ).click(function() {
-			$.get( 'feed')
-			.done(function( data ) {
-				if(data == '1'){
-					alert('Success!');
-				}else{
-					alert('Fail!');
-				}
-			});
-		});
-	</script>
+	<img src={{ url_for('static', filename="img.jpg")}}>
 </body>
 </html>
