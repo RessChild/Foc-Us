@@ -35,8 +35,6 @@ class Camera(object):
             stream = io.BytesIO()
             for foo in camera.capture_continuous(stream, 'jpeg',
                                                  use_video_port=True):
-                im = Image.open(stream)
-                im.save('./static/img.jpg', 'JPEG')
                 stream.seek(0)
                 self.frame = stream.read()
 

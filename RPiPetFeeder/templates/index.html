@@ -4,8 +4,18 @@
 	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 </head>
 <body>
+	<p>
 	<h1>임베디드 카메라</h1>
-	<img src="{{ url_for('video_feed') }}">
-	<img src={{ url_for('static', filename="img.jpg")}}>
+	</p>
+	<img src={{ url_for('video_feed') }}>
+	<img src={{ url_for("static", filename="img.jpg")}}>
+	<p>
+	<input type="button" value="촬영" onclick='refresh();'>
+	<script>
+		function refresh(){
+			location.reload()
+		}
+	</script>
+	</p>
 </body>
 </html>
