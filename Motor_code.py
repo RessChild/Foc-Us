@@ -74,6 +74,7 @@ def objDetect():
         frame = imutils.resize(frame, width=400) # 사진 크기 변환
     
      	# detect people in the image
+        print(type(frame))
         (rects, weights) = hog.detectMultiScale(frame, winStride=(4, 4), padding=(8, 8), scale=1.05)
         # 탐색해서 대상이 있다고 예상되는 사각형을 갖고 옴
     

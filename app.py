@@ -3,6 +3,7 @@ from flask import Flask, render_template, Response
 from camera import Camera
 from time import sleep
 import cv2
+import variable_resistor as vr
 app = Flask(__name__)
 
 cam = Camera()
@@ -19,6 +20,9 @@ def set_response_headers(r):
 @app.route('/')
 def index():
     global flag
+    print(vr.adc_value)
+    if vr.adc_value != -1:
+        sleep(vr.main())
     flag = True
     sleep(0.5)
     return render_template('index.html')
