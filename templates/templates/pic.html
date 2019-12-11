@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<head>
+<title>Title</title>
+</head>
+<body>
+<p>
+<input type="button" value="촬영" onclick='refresh();'>
+<script>
+function refresh() {
+location.reload()
+}
+</script>
+</p>
+<p>
+<img src={{ url_for("static", filename="img.jpg" )}}>
+</p>
+</body
