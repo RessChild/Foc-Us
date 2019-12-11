@@ -20,22 +20,23 @@ def set_response_headers(r):
 def index():
     global flag
     flag = True
+    sleep(0.5)
     return render_template('index.html')
 
 def gen(camera):
     global flag
+    global frame
     while True:
-       if flag:
-           sleep(1)
-           flag = False
-       global frame
-       frame = camera.get_frame()
-       f = open('./static/img.jpg', 'wb')
-       f.write(frame)
-       f.close()
+        frame = camera.get_frame()
+        f = open('./static/img.jpg', 'wb')
+        f.write(frame)
+        f.close()
+        if flag:
+            sleep(1)
+            flag = False
 
-       yield (b'--frame\r\n'
-              b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 @app.route('/video_feed')
 def video_feed():
