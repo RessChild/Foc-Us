@@ -121,13 +121,11 @@ def objDetect():
     return False # 실패. 더이상 진행 불가
 
 
-def ledTimer(loop): # 타이머 정의 함수, 1초를 주기로 깜빡거림
-    for i in range(loop):
-        GPIO.output(ledPIN,GPIO.HIGH)
-        time.sleep(0.5)
-        GPIO.output(ledPIN,GPIO.LOW)
-        time.sleep(0.5)
-# led 함수 확인완료
+def ledon(): # 타이머 정의 함수, 1초를 주기로 깜빡거림
+    GPIO.output(ledPIN,GPIO.HIGH)
+
+def ledoff():
+    GPIO.output(ledPIN,GPIO.LOW)
 
 def servoControl(move): # 모터 컨트롤용 함수
     global angle

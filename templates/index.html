@@ -9,6 +9,7 @@
 	</p>
 	<img src={{ url_for('video_feed') }}>
 	<img src={{ url_for("static", filename="img.jpg")}}>
+	<h3>{{timer}}</h3>
 	<p>
 	<input type="button" value="촬영" onclick='refresh();'>
 	<script>
@@ -17,5 +18,13 @@
 		}
 	</script>
 	</p>
+	<p>
+	<h4>메뉴얼</h4>
+	</p>
+	<ul>
+		{% for n in manual %}
+		<li>{{n}}</li>
+		{% endfor %}
+	</ul>
 </body>
 </html>

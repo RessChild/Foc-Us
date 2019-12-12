@@ -12,6 +12,7 @@ import threading
 import RPi.GPIO as GPIO
 import time
 
+adc_value = -1
 SPICLK = 11
 SPIMISO = 9
 SPIMOSI = 10
@@ -64,25 +65,18 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin): # 가변저항 세팅 �
 
 def timerValue():
     init()
-    return readadc(photo_ch, SPICLK, SPIMOSI, SPIMISO, SPICS)/145 # 가변저항 값    
+    return readadc(photo_ch, SPICLK, SPIMOSI, SPIMISO, SPICS)/145 + 1 # 가변저항 값    
 
 def main():
-    init()
-    time.sleep(2)
-    print("analog level\n")
-#    pwm = GPIO.PWM(LED,1000) # 1000 기준으로 세팅
-#    pwm.start(0) # 시작
-    while True:
-        adc_value=readadc(photo_ch, SPICLK, SPIMOSI, SPIMISO, SPICS) # 가변저항 값
-        adc_value = adc_value/145 # 11로 나눠서 적절한 값으로 변환
-        print("%d" % adc_value) # 출력
-        time.sleep(0.2) # 0.2 초 쉬고
-#        pwm.ChangeDutyCycle(adc_value) # LED 밝기 변환
-
-if __name__ == '__main__':
-    try:
-        main() # 시작
-    except KeyboardInterrupt:
-        GPIO.cleanup() # 종료
+    global adc_value
+    adc_value=readadc(photo_ch, SPICLK, SPIMOSI, SPIMISO, SPICS)/145 + 1 # 가변저항 값
+    return adc_value
 
 
+#if __name__ == '__main__':
+#    try:
+#        main() # 시작
+#    except KeyboardInterrupt:
+#        GPIO.cleanup() # 종료
+
+init()

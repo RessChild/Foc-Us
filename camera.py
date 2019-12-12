@@ -24,7 +24,7 @@ GPIO.setup(servoPIN, GPIO.OUT) # 모터 조작용 정보핀
 GPIO.setup(ledPIN, GPIO.OUT) # 타이머 대용으로 쓸거므로 out
 
 p = GPIO.PWM(servoPIN, 100) # GPIO 17 als PWM mit 50Hz
-GPIO.PWM(ledPIN, 100) # GPIO 17 als PWM mit 50Hz
+GPIO.PWM(ledPIN, 100) # LED PWM
 # 이게 왜 50부터 시작인지는 좀 봐야할거같음
 # LED 에선 PWM이 밝기값을 조절하는 용도
 # servo 에서는 값 표현의 범위가 비례하며 값이 클수록 세세한 조절이 가능
@@ -33,10 +33,9 @@ GPIO.PWM(ledPIN, 100) # GPIO 17 als PWM mit 50Hz
 
 # 정확히는 현재 각도의 값을 몇으로 잡을 것인가를 정의
 
-p.start(0) # Initialisierung 초기화
 angle = 10 # 모터가 사용할 기본 (3~17 중간값)
-p.ChangeDutyCycle(angle) # 중심으로 모터를 옮김
-time.sleep(2)
+p.start(angle) # 모터 초기화
+time.sleep(1)
 # 이걸 기반으로 모터 각을 계산하고 이동여부를 판단
 
 # 원래는 현재 기기가 가리키는 각도의 값을 반환받아 쓰고자 했는데
@@ -52,22 +51,30 @@ class Camera(object):
     thread = None
     frame = None
     last_access = 0
+    print('set')
 
     def initialize(self):
         if Camera.thread is None:
-            Camera.thread = threading.Thread(target=self._thread)
+            Camera.thread = threading.Thread(target=self._thread) # 이미지 연속 캡쳐로 동영상처럼 만들기 위해 thread 생성
             Camera.thread.start()
 
             while self.frame is None:
                 time.sleep(0)
 
     def get_frame(self):
-        Camera.last_access = time.time()
+        Camera.last_access = time.time() # 협정 세계시 기준 특정 일로부터 경과한 시간 저장
         self.initialize()
-        while str(type(self.frame)) == "<class 'numpy.ndarray'>":
+        while str(type(self.frame)) == "<class 'numpy.ndarray'>": # 파일 형식 무결성 확인(cv2 : numpy.ndarray, frame : bytes)
             continue
 
         return self.frame
+
+    def ledon(self): # LED On
+        GPIO.output(ledPIN,GPIO.HIGH)
+    
+    def ledoff(self): # LED OFF
+        GPIO.output(ledPIN,GPIO.LOW)
+
 
     def _thread(self):
         def servoControl(move): # 모터 컨트롤용 함수
@@ -79,19 +86,18 @@ class Camera(object):
             angle = angle+move if canMove else angle
             # 3~17 사이값이면 움직일수있으니 True, 그 외엔 이동불가
             # 움직일수있다면 움직이고 아니면 고정
-
             p.ChangeDutyCycle(angle)
             print(angle)
-            time.sleep(0.7)
+            time.sleep(2)
             # 실제로 카메라를 움직이는 구간
             # 입출력 시간을 고려해서 몇번 테스트 해봐야할듯
 
             return canMove # 움직이기 성공 여부 판단
 
         with picamera.PiCamera() as camera:
-            camera.resolution = (320, 240)
-            camera.hflip = True
+            camera.resolution = (320, 240) # 해상도 설정
             camera.vflip = True
+            camera.hflip = True
 
             camera.start_preview()
             time.sleep(2)
@@ -124,12 +130,12 @@ class Camera(object):
                     # 최종탐색
 
                     if x1 + (w1//2) > 205: # 피사체 중심이 오른쪽으로 쏠린 경우
-                        print("오른쪽 이동")
+                        print("왼쪽 이동")
                         succ = True if servoControl(1) else False # 그 반대방향으로 이동
                         if not succ:
                             print('왼쪽으로 최대치만큼 이동했습니다') # 초점을 맞추기 위해 더이상 움직일 수 없다면, 종료
                     elif x1 + (w1//2) < 195: #
-                        print("왼쪽 이동")
+                        print("오른쪽 이동")
                         succ = True if servoControl(-1) else False
                         if not succ:
                             print('오른쪽으로 최대치만큼 이동했습니다') # 마찬가지
@@ -143,10 +149,10 @@ class Camera(object):
                 #if time.time() - Camera.last_access > 10:
                 #    break
 
-                #cv2.imshow("Array", p_arr)
-                #key = cv2.waitKey(1) & 0xFF # 입력된 키가 있고, q라면 종료
-                #if key == ord("q"):
-                #    break
+                cv2.imshow("Array", p_arr)
+                key = cv2.waitKey(1) & 0xFF # 입력된 키가 있고, q라면 종료
+                if key == ord("q"):
+                    break
 
         thread = None
 
